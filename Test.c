@@ -1,18 +1,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#define ART1 1
-#define ART2 2
-#define ART3 3
-#define ART4 4
-#define ART5 5
-#define ART6 6
-#define ART7 7
-#define ART8 8
-#define ART9 9
-#define ART10 10
-#define ART11 11
-#define ART12 12
+#define _ENTREE_ ft_place_stock(grid, 8, 100, 1)
 
 
 void	ft_putchar(char c)
@@ -133,7 +122,7 @@ void	ft_ini(int grid[4][12][5])
 	}
 }
 
-void	ft_DLC_pri(int grid[4][12][5], int art, int pos[2])
+int		ft_DLC_pri(int grid[4][12][5], int art, int pos[2])
 {
 	int i;
 	int j;
@@ -174,7 +163,9 @@ void	ft_DLC_pri(int grid[4][12][5], int art, int pos[2])
 	{
 		ft_putstr(" > Erreur : Pas de pallette en stock\n");
 		ft_putstr(" > Etat : ABORT\n");
+		return 0;
 	}
+	return 1;
 }
 
 int		ft_fill_stock(int grid[4][12][5], int art, int qte, int x, int y, int prio)
@@ -222,28 +213,6 @@ void 	ft_void_stock(int grid[4][12][5], int x, int y)
 		grid[x][y][4] = 0;
 }
 
-int		ft_pick(int grid[4][12][5], int art, int qte)
-{
-	ft_putstr(" > Action : preparation commande\n");
-	int j;
-
-	j = 0;
-	while (j < 12)
-	{	
-		if (grid[0][j][0] == 0 && grid[0][j][1] == art)
-		{
-			ft_putstr(" > Erreur picking article ");
-			ft_putchar(grid[0][art - 1][1] + 64);
-			ft_putstr(" négatif\n");
-			ft_putstr(" > Etat : ABORT\n");
-			break;
-		}
-		if (grid[0][j][1] == art)
-			grid[0][j][0] = grid[0][j][0] - qte;
-		j++;
-	}
-}
-
 int		ft_procure_picking(int grid[4][12][5], int art)
 {
 	ft_putstr(" > Action : Reappro picking\n");
@@ -251,7 +220,8 @@ int		ft_procure_picking(int grid[4][12][5], int art)
 	int j;
 
 	j = 0;
-	ft_DLC_pri(grid, art, pos);
+	if (ft_DLC_pri(grid, art, pos) == 0)
+		return 0;
 	if (pos[0] == 0 && pos[1] == 1)
 		return 0;
 	else
@@ -267,6 +237,28 @@ int		ft_procure_picking(int grid[4][12][5], int art)
 		ft_void_stock(grid, pos[0], pos[1]);
 	}
 	return 1;
+}
+
+int		ft_pick(int grid[4][12][5], int art, int qte)
+{
+	ft_putstr(" > Action : preparation commande\n");
+	int j;
+
+	j = 0;
+	while (j < 12)
+	{	
+		if (grid[0][j][0] == 0 && grid[0][j][1] == art)
+		{
+			ft_putstr(" > Erreur picking article ");
+			ft_putchar(grid[0][art - 1][1] + 64);
+			ft_putstr(" négatif\n");
+			ft_putstr(" > Etat : DEMANDE REAPPRO\n");
+			return 2;
+		}
+		if (grid[0][j][1] == art)
+			grid[0][j][0] = grid[0][j][0] - qte;
+		j++;
+	}
 }
 
 int		*ft_find_place_stock(int grid[4][12][5], int art, int pos[2])
@@ -350,30 +342,28 @@ int 	main(int argc, char **argv)
 		getchar();
 
 	//------------------RECEPTION------------------//
-		//ft_fill_stock(grid, 8, 100, 1, 7, 1);
-		ft_place_stock(grid, 8, 100, 1);
-		ft_place_stock(grid, 8, 100, 2);
-		ft_place_stock(grid, 8, 100, 3);
-		ft_place_stock(grid, 8, 100, 4);
-		ft_place_stock(grid, 8, 100, 5);
-		ft_place_stock(grid, 8, 100, 6);
-		
-
+		//_ENTREE_;
+		ft_place_stock(grid, 8, 5, 1);
+		ft_place_stock(grid, 8, 5, 2);
+		ft_place_stock(grid, 8, 5, 3);
+		ft_place_stock(grid, 8, 5, 4);
+		ft_place_stock(grid, 8, 5, 5);
+		ft_place_stock(grid, 8, 5, 6);
 		ft_display(grid);
 		getchar();
-		
 
 	//-----------------PREPARATION-----------------//
-		ft_procure_picking(grid, 8);
-		ft_display(grid);
-		getchar();
-		ft_procure_picking(grid, 8);
-		ft_display(grid);
-		getchar();
-		ft_procure_picking(grid, 8);
-		ft_display(grid);
-		getchar();
-		ft_pick(grid, 8, 1);
+		while (test < 25)
+		{
+			if (ft_pick(grid, 8, 1) == 2)
+			{
+				getchar();
+				ft_display(grid);
+				if (ft_procure_picking(grid, 8) == 0)
+					break;
+			}
+			test++;
+		}
 		ft_display(grid);
 
 	return 0;
